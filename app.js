@@ -1,11 +1,11 @@
-// Book Constructor
+// ************************** Book Constructor **************************
 function Book(title, author, isbn) {
     this.title = title;
     this.author = author;
     this.isbn = isbn;
 };
 
-// UI Constructor
+// ************************** UI Constructor **************************
 function UI() {}
 
 // Add book to list
@@ -60,6 +60,54 @@ UI.prototype.clearFields = function() {
     document.getElementById('isbn').value = '';
 }
 
+// ************************** STORAGE Constructor **************************
+
+function Store() {}
+
+Store.prototype.getBooks = function () {
+    let books;
+        if(localStorage.getItem('books') === null) {
+            books = [];
+        } else {
+            books = JSON.parse(localStorage.getItem('books'));
+        }
+
+        return books;
+}
+
+Store.prototype.displayBooks = function () {
+    const books = Store.prototype.getBooks();
+
+        books.forEach(function(book) {
+            const ui = new UI;
+
+            ui.addBookToList(book);
+        });
+}
+
+Store.prototype.addBook = function (book) {
+    const books = Store.prototype.getBooks();
+
+        books.push(book);
+
+        localStorage.setItem('books', JSON.stringify(books));
+}
+
+Store.prototype.removeBook = function (isbn) {
+    const books = Store.prototype.getBooks();
+
+        books.forEach(function(book, index) {
+            if(book.isbn === isbn) {
+                books.splice(index ,1);
+            }
+        });
+
+        localStorage.setItem('books', JSON.stringify(books));
+}
+
+// DOM Load Event 
+document.addEventListener('DOMContentLoaded', Store.prototype.displayBooks);
+
 // Event Listeners for add book
 document.getElementById('book-form').addEventListener('submit', function(e) {
     // Get form values from the UI
@@ -73,6 +121,9 @@ document.getElementById('book-form').addEventListener('submit', function(e) {
     // Instantiate UI
     const ui = new UI();
 
+    // Instantiate Store
+    const store = new Store()
+
     // Validate
     if(title === '' || author === '' || isbn === '' ) {
         // Error alert 
@@ -80,6 +131,9 @@ document.getElementById('book-form').addEventListener('submit', function(e) {
     } else {
         // Add book to list
         ui.addBookToList(book);
+
+        // Add book to Local Storage
+        store.addBook(book)
 
         // Show success 
         ui.showAlert('Book Added!' , 'success ');
@@ -98,6 +152,10 @@ document.getElementById('book-list').addEventListener('click', function(e) {
 
     // Delete Book
     ui.deleteBook(e.target);
+
+    // Remove book from Local Storage
+    Store.prototype.removeBook(e.target.parentElement.previousElementSibling.textContent);
+    // console.log(e.target.parentElement.previousElementSibling.textContent);
 
     // Show message 
     ui.showAlert('Book Removed!',  'success');
